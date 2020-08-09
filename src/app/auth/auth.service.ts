@@ -17,7 +17,7 @@ export interface AuthResponseData {
 export class AuthService {
   // BehaviorSubject gives the subscriber access to the values in the subject whenever they want (not just when new data is pushed)
   user = new BehaviorSubject<User>(null);
-
+  private tokenExpirationTimer: any;
   constructor(private http: HttpClient) {}
 
   signup(email: string, password: string) {
@@ -68,6 +68,11 @@ export class AuthService {
 
   logout() {
     this.user.next(null);
+    localStorage.removeItem("userData");
+    if (this.tokenExpirationTimer) {
+        clearTimeout(this.tokenExpirationTimer);
+    }
+    this.tokenExpirationTimer = null;
   }
 
   autoLogin() {
@@ -89,7 +94,15 @@ export class AuthService {
 
     if (loadedUser.token) {
       this.user.next(loadedUser);
+      const expirationDuration = new Date(userData._tokenExpirationDate).getTime() - new Date().getTime();
+      this.autoLogout(expirationDuration)
     }
+  }
+
+  autoLogout(expirationDuration: number) {
+    this.tokenExpirationTimer = setTimeout(() => {
+      this.logout();
+    }, expirationDuration);
   }
 
   private handleAuthentication(
@@ -101,6 +114,7 @@ export class AuthService {
     const expirationDate = new Date(new Date().getTime() + expiresIn * 1000);
     const user = new User(email, userId, token, expirationDate);
     this.user.next(user);
+    this.autoLogout(expiresIn * 1000);
     localStorage.setItem("userData", JSON.stringify(user));
   }
 
