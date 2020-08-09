@@ -23,32 +23,20 @@ export class DataStorageService {
   }
 
   fetchRecipes() {
-    // take operatore only takes one user and then unsubscribes
-    // because we don't want an ongoing subscription
-
-    // exhaustMap waits for first observable to complete, then gives us
-    // the user and then relaces it with the inner observable
-    return this.authService.user.pipe(
-      take(1),
-      exhaustMap((user) => {
-        return this.http.get<Recipe[]>(
-          "https://recipebook-a74a8.firebaseio.com/recipes.json",
-          {
-            params: new HttpParams().set('auth', user.token)
-          }
-        );
-      }),
-      map((recipes) => {
-        return recipes.map((recipe) => {
-          return {
-            ...recipe,
-            ingredients: recipe.ingredients ? recipe.ingredients : [],
-          };
-        });
-      }),
-      tap((recipes) => {
-        this.recipeService.setRecipes(recipes);
-      })
-    );
+    return this.http
+      .get<Recipe[]>("https://recipebook-a74a8.firebaseio.com/recipes.json")
+      .pipe(
+        map((recipes) => {
+          return recipes.map((recipe) => {
+            return {
+              ...recipe,
+              ingredients: recipe.ingredients ? recipe.ingredients : [],
+            };
+          });
+        }),
+        tap((recipes) => {
+          this.recipeService.setRecipes(recipes);
+        })
+      );
   }
 }
