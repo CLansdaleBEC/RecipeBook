@@ -9,6 +9,7 @@ import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { ReactiveFormsModule } from "@angular/forms";
 import { RecipesRoutingMdule } from "./recipes-routing.module";
+import { DropdownDirective } from '../shared/dropdown.directive';
 
 @NgModule({
   declarations: [
@@ -17,6 +18,7 @@ import { RecipesRoutingMdule } from "./recipes-routing.module";
     RecipeDetailComponent,
     RecipeItemComponent,
     RecipeEditComponent,
+    DropdownDirective,
   ],
   imports: [
     CommonModule,
